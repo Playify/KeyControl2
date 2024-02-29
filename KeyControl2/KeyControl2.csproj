@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <LangVersion>latest</LangVersion>
+        <ApplicationIcon>Resources/favicon.ico</ApplicationIcon>
+        <AssemblyVersion>3.0.0</AssemblyVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NCalc.NetCore" Version="1.0.1" />
+        <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="PlayifyUtility">
+            <HintPath>..\..\PlayifyUtility\_run\net6.0\PlayifyUtility.dll</HintPath>
+        </Reference>
+        <Reference Include="PlayifyUtility.Windows">
+            <HintPath>..\..\PlayifyUtility\_run\net6.0-windows\PlayifyUtility.Windows.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Features\Games\ControllerAsMouse.Mouse.cs">
+            <DependentUpon>ControllerAsMouse.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Games\CrossHair.Window.cs">
+            <DependentUpon>CrossHair.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Strings\HotStringsHandler.Hook.cs">
+            <DependentUpon>HotStringsHandler.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Keyboard\Spammer.Indicator.cs">
+            <DependentUpon>Spammer.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Strings\HotStringsHandler.Defaults.cs">
+            <DependentUpon>HotStringsHandler.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Configuration\ConfigWindow.WebBrowser.cs">
+            <DependentUpon>ConfigWindow.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Windows\MoveWindows.F1.cs">
+            <DependentUpon>MoveWindows.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Windows\MoveWindows.Mouse.cs">
+            <DependentUpon>MoveWindows.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Configuration\ConfigScriptingObject.cs">
+            <DependentUpon>ConfigWindow.WebBrowser.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Features\Games\ControllerCustomButton.cs">
+            <DependentUpon>ControllerAsMouse.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\**" />
+    </ItemGroup>
+
+</Project>
