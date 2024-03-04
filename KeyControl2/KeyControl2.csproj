@@ -6,23 +6,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>preview</LangVersion>
         <ApplicationIcon>Resources/favicon.ico</ApplicationIcon>
         <AssemblyVersion>3.0.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="NCalc.NetCore" Version="1.0.1" />
+        <PackageReference Include="PlayifyUtility" Version="1.2.0" />
+        <PackageReference Include="PlayifyUtility.Windows" Version="1.2.0" />
         <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="PlayifyUtility">
-            <HintPath>..\..\PlayifyUtility\_run\net6.0\PlayifyUtility.dll</HintPath>
-        </Reference>
-        <Reference Include="PlayifyUtility.Windows">
-            <HintPath>..\..\PlayifyUtility\_run\net6.0-windows\PlayifyUtility.Windows.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
     <ItemGroup>

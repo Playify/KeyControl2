@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using KeyControl2.Features.Strings.HotStrings;
@@ -37,8 +38,8 @@ public class ConfigServer:WebBase{
 	private static Stream? OpenFile(string path){
 		//*
 #if DEBUG
-		if(System.Diagnostics.Debugger.IsAttached){
-			var filePath=Path.Combine(@"S:\Code\C#\own\KeyControl2\KeyControl2\Resources",path.Trim('/'));
+		if(Debugger.IsAttached){
+			var filePath=Path.Combine("../../../Resources",path.Trim('/'));
 			if(File.Exists(filePath)) return File.OpenRead(filePath);
 			Console.WriteLine("WebPath doesn't exist!");
 		}
