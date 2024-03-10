@@ -35,7 +35,7 @@ public class ConfigServer:WebBase{
 		// ReSharper disable once FunctionNeverReturns
 	}
 
-	private static Stream? OpenFile(string path){
+	public static Stream? OpenFile(string path){
 		//*
 #if DEBUG
 		if(Debugger.IsAttached){

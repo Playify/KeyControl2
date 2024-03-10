@@ -11,6 +11,7 @@
         <AssemblyVersion>3.0.0</AssemblyVersion>
     </PropertyGroup>
 
+
     <ItemGroup>
         <PackageReference Include="NCalc.NetCore" Version="1.0.1" />
         <PackageReference Include="PlayifyUtility" Version="1.2.0" />
