@@ -9,11 +9,23 @@ namespace KeyControl2.Configuration;
 
 [InitOnLoad]
 public sealed partial class ConfigWindow:Form{
-	private static readonly Icon ProgramIcon=Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)!;
+	private static readonly Icon ProgramIcon/*=Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)!*/;
 	private static ConfigWindow? _instance;
 	private static ConfigWindow Instance=>_instance??=UiThread.Create(nameof(ConfigWindow)).Invoke(()=>new ConfigWindow());
 
 	static ConfigWindow(){
+
+
+		using(var stream=ConfigServer.OpenFile("/favicon.ico")){
+			ProgramIcon=new Icon(stream!);
+		}
+		ToolStripMenuItem pause=null!;
+		// ReSharper disable once AccessToModifiedClosure
+		pause=new ToolStripMenuItem("Pause",null,(_,_)=>{
+			var paused=Utils.Paused^=true;
+			pause.Text=paused?"Resume Hooks":"Pause Hooks";
+		});
+
 		var notifyIcon=new NotifyIcon{
 			Icon=ProgramIcon,
 			Text=Config.VersionString,
@@ -22,7 +34,7 @@ public sealed partial class ConfigWindow:Form{
 					{"Settings",null,(_,_)=>ToggleOpen()},
 					{"&Unhide all",null,(_,_)=>WinWindow.RestoreAll()},
 					{"&Exit and unhide all",null,(_,_)=>Environment.Exit(0)},
-					//TODO add 'Pause' entry
+					pause,
 				},
 			},
 		};
