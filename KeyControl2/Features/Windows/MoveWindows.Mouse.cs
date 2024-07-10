@@ -43,8 +43,13 @@ public static partial class MoveWindows{
 	}
 
 	private static void MouseMove(MouseEvent e){
-		if(EnableF1.Value&&_f1Down/*&&Modifiers.IsKeyDown(Keys.F1)*/) RunF1();
-		else _f1Down=false;
+		if(EnableF1.Value&&_f1Down/*&&Modifiers.IsKeyDown(Keys.F1)*/){
+			Console.WriteLine(_f1Down);
+			lock(typeof(MoveWindows))
+				if(_f1Running) return;
+				else _f1Running=true;
+			UiThread.BeginInvoke(RunF1);
+		} else _f1Down=false;
 
 
 		if(_move){

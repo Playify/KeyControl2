@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using PlayifyUtility.Windows;
 using PlayifyUtility.Windows.Features.Hooks;
 using PlayifyUtility.Windows.Features.Interact;
 using PlayifyUtility.Windows.Win;
@@ -6,9 +9,11 @@ using PlayifyUtility.Windows.Win.Native;
 namespace KeyControl2.Features.Windows;
 
 public static partial class MoveWindows{
+	private static readonly UiThread UiThread=UiThread.Create(nameof(MoveWindows));
 	private static bool _lWin;
 	private static bool _rWin;
 	private static bool _f1Down;
+	private static bool _f1Running;
 
 	private static void KeyDown(KeyEvent e){
 		if(e.Key!=Keys.F1&&!(e.Key==Keys.Packet&&EnableVive.Value&&e.ScanCode=='£')) return;
@@ -36,9 +41,12 @@ public static partial class MoveWindows{
 		}
 		//Only move window if no additional modifier is pressed
 		if(mods!=ModifierKeys.None) return;
-
-		RunF1();
 		e.Handled=true;
+
+		lock(typeof(MoveWindows))
+			if(_f1Running) return;
+			else _f1Running=true;
+		UiThread.BeginInvoke(RunF1);
 	}
 
 	private static void KeyUp(KeyEvent e){
@@ -69,6 +77,14 @@ public static partial class MoveWindows{
 		var beforeScreen=Screen.FromRectangle(rectangle);
 		var afterScreen=Screen.FromPoint(cursorPos);
 
+
+		//TODO PlayifyUtility SetTransitionsForceDisabled,Redraw
+
+		var value=true;
+		var err=DwmSetWindowAttribute(window.Hwnd,3,ref value,4);
+		if(err!=0) throw new Win32Exception(err);
+
+
 		var maximize=false;
 		var isWin11=Environment.OSVersion.Version.Build>22000;//Win11 doesn't allow MoveWindow on already maximized windows, therefore a workaround is needed
 		if(isWin11&&beforeScreen.Bounds!=afterScreen.Bounds&&window.Maximized){
@@ -87,6 +103,25 @@ public static partial class MoveWindows{
 
 
 		window.MoveWindow(rectangle,!maximize);
+
 		if(maximize) window.Maximized=true;//maximizing redraws, therefore MoveWindow doesn't need to
+
+		value=false;
+		err=DwmSetWindowAttribute(window.Hwnd,3,ref value,4);
+		if(err!=0) throw new Win32Exception(err);
+
+		Console.WriteLine(window.Class);
+		RedrawWindow(window.Hwnd,0,0,0x581);
+
+		lock(typeof(MoveWindows))
+			_f1Running=false;
 	}
+
+	[DllImport("dwmapi.dll")]
+	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref bool attrValue,int four);
+
+
+	[DllImport("user32.dll")]
+	private static extern bool RedrawWindow(IntPtr hWnd,int lprcUpdate,int hrgnUpdate,uint flags);
+
 }

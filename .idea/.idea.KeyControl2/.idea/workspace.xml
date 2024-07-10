@@ -7,11 +7,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b100187e-ebcf-4f75-9f43-535dce273dc3" name="Changes" comment="Initial commit, using temporary version of PlayifyUtility">
+    <list default="true" id="b100187e-ebcf-4f75-9f43-535dce273dc3" name="Changes" comment="Fixed F1 leaving behind white areas in explorer">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.KeyControl2/.idea/misc.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.KeyControl2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.KeyControl2/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/KeyControl2.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/KeyControl2.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KeyControl2/Configuration/ConfigServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KeyControl2/Configuration/ConfigServer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KeyControl2/Features/Technical/PopupBlocker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KeyControl2/Features/Technical/PopupBlocker.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KeyControl2/Features/Windows/MoveWindows.F1.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KeyControl2/Features/Windows/MoveWindows.F1.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KeyControl2/Features/Windows/MoveWindows.Mouse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KeyControl2/Features/Windows/MoveWindows.Mouse.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/KeyControl2/KeyControl2.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/KeyControl2/KeyControl2.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -35,8 +36,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="63a672dd-6d73-4403-9d9d-7e8c526d8bc9" />
+  </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/KeyControl2/Configuration/Config.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/KeyControl2/Configuration/ConfigWindow.cs" root0="FORCE_HIGHLIGHTING" />
@@ -127,19 +130,46 @@
       <workItem from="1709066388010" duration="10880000" />
       <workItem from="1709194287290" duration="2383000" />
       <workItem from="1709204783886" duration="4000" />
+      <workItem from="1709541935985" duration="648000" />
+      <workItem from="1709545276560" duration="1081000" />
+      <workItem from="1709638155826" duration="873000" />
+      <workItem from="1710944002200" duration="641000" />
+      <workItem from="1720605543473" duration="6478000" />
     </task>
+    <task id="LOCAL-00001" summary="Changed to new official version of PlayifyUtility">
+      <option name="closed" value="true" />
+      <created>1709542257858</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1709542257858</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Initial commit, using temporary version of PlayifyUtility" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit, using temporary version of PlayifyUtility" />
+    <MESSAGE value="Changed to new official version of PlayifyUtility" />
+    <MESSAGE value="Fixed F1 leaving behind white areas in explorer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed F1 leaving behind white areas in explorer" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
