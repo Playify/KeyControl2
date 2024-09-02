@@ -20,7 +20,7 @@ public static partial class CrossHair{
 	private static readonly ConfigValue<bool> Enabled=ConfigValue.Create(false,"Games","CrossHair","Enabled").Listen(b=>{
 		_hook?.Dispose();
 		UiThread.BeginInvoke(()=>{
-			if(b) _hook=GlobalEventHook.HookCurrent(0x800b,_=>OnTick());
+			if(b) _hook=GlobalEventHook.Hook(UiThread,0x800b,_=>OnTick());
 			Timer.Enabled=b;
 			OnTick();
 		});

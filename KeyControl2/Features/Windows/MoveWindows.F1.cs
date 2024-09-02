@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using PlayifyUtility.Windows;
 using PlayifyUtility.Windows.Features.Hooks;
 using PlayifyUtility.Windows.Features.Interact;
@@ -24,7 +22,6 @@ public static partial class MoveWindows{
 
 		//If only windows is pressed, then do normal F1
 		if(mods==ModifierKeys.Windows){
-
 			KeyEvent.CancelWindowsKey();
 			var send=new Send();
 			if(Modifiers.IsKeyDown(Keys.LWin)){
@@ -36,17 +33,19 @@ public static partial class MoveWindows{
 				send.Key(Keys.RWin,false);
 			}
 			send.SendNow();
-
-			return;
+		} else if((mods&ModifierKeys.Windows)!=0&&(mods&ModifierKeys.Control)!=0){
+			e.Handled=true;
+			lock(typeof(MoveWindows))
+				if(_f1Running) return;
+				else _f1Running=true;
+			RunF1(true);
+		} else if(mods==ModifierKeys.None){
+			e.Handled=true;
+			lock(typeof(MoveWindows))
+				if(_f1Running) return;
+				else _f1Running=true;
+			RunF1();
 		}
-		//Only move window if no additional modifier is pressed
-		if(mods!=ModifierKeys.None) return;
-		e.Handled=true;
-
-		lock(typeof(MoveWindows))
-			if(_f1Running) return;
-			else _f1Running=true;
-		UiThread.BeginInvoke(RunF1);
 	}
 
 	private static void KeyUp(KeyEvent e){
@@ -62,27 +61,40 @@ public static partial class MoveWindows{
 		}
 	}
 
-	public static void RunF1(){
+	public static void RunF1(bool swap=false){
 		var window=WinWindow.Foreground;
+		if(!IsValidWindow(window)) return;
+		if(!WinCursor.TryGetCursorPos(out var cursorPos)) return;
+		var other=swap?WinWindow.GetWindowAt(cursorPos):WinWindow.Zero;
+
+		UiThread.BeginInvoke(()=>{
+			if(IsValidWindow(other)) SwapWindows(window,other);
+			else MoveWindow(window,cursorPos);
+
+			lock(typeof(MoveWindows))
+				_f1Running=false;
+		});
+	}
+
+	private static bool IsValidWindow(WinWindow window){
+		if(window==WinWindow.Zero) return false;
 
 		//Desktop or Taskbar should not be moved
-		if(window.Class is "Progman" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd") return;
+		if(window.Class is "Progman" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd" or "WorkerW") return false;
 
-		if(Path.GetFileName(window.ProcessExe)=="paintdotnet.exe"&&(window.ExStyle&ExStyle.ToolWindow)!=0)
-			return;
+		if(Path.GetFileName(window.ProcessExe)=="paintdotnet.exe"&&(window.ExStyle&ExStyle.ToolWindow)!=0) return false;
 
-		if(!WinCursor.TryGetCursorPos(out var cursorPos)) return;
+		return true;
+	}
+
+	private static void MoveWindow(WinWindow window,Point pos){
 
 		Rectangle rectangle=window.WindowRect;
 		var beforeScreen=Screen.FromRectangle(rectangle);
-		var afterScreen=Screen.FromPoint(cursorPos);
+		var afterScreen=Screen.FromPoint(pos);
 
 
-		//TODO PlayifyUtility SetTransitionsForceDisabled,Redraw
-
-		var value=true;
-		var err=DwmSetWindowAttribute(window.Hwnd,3,ref value,4);
-		if(err!=0) throw new Win32Exception(err);
+		window.SetTransitionsForceDisabled(true);
 
 
 		var maximize=false;
@@ -103,25 +115,64 @@ public static partial class MoveWindows{
 
 
 		window.MoveWindow(rectangle,!maximize);
+		if(maximize) window.Maximized=true;//maximizing redraws, therefore MoveWindow doesn't need to //but it does anyway, in hopes of fixing redraw bugs
 
-		if(maximize) window.Maximized=true;//maximizing redraws, therefore MoveWindow doesn't need to
-
-		value=false;
-		err=DwmSetWindowAttribute(window.Hwnd,3,ref value,4);
-		if(err!=0) throw new Win32Exception(err);
-
-		Console.WriteLine(window.Class);
-		RedrawWindow(window.Hwnd,0,0,0x581);
-
-		lock(typeof(MoveWindows))
-			_f1Running=false;
+		window.SetTransitionsForceDisabled(false);
+		window.Redraw();
 	}
 
-	[DllImport("dwmapi.dll")]
-	private static extern int DwmSetWindowAttribute(IntPtr hwnd,int attr,ref bool attrValue,int four);
+	private static void SwapWindows(WinWindow win1,WinWindow win2){
+		if(win1==win2) return;
+
+		Rectangle rec1=win1.WindowRect;
+		Rectangle rec2=win2.WindowRect;
+		var screen1=Screen.FromRectangle(rec1);
+		var screen2=Screen.FromRectangle(rec2);
 
 
-	[DllImport("user32.dll")]
-	private static extern bool RedrawWindow(IntPtr hWnd,int lprcUpdate,int hrgnUpdate,uint flags);
+		win1.SetTransitionsForceDisabled(true);
+		win2.SetTransitionsForceDisabled(true);
 
+		var max1=false;
+		var max2=false;
+		var isWin11=Environment.OSVersion.Version.Build>22000;//Win11 doesn't allow MoveWindow on already maximized windows, therefore a workaround is needed
+
+		if(isWin11&&screen1.Bounds!=screen2.Bounds){
+			if(win1.Maximized){
+				max2=true;
+				win1.Maximized=false;
+				rec1=win1.WindowRect;
+			}
+			if(win2.Maximized){
+				max1=true;
+				win2.Maximized=false;
+				rec2=win2.WindowRect;
+			}
+		}
+
+
+		if(win1.Fullscreen||win1.Maximized) rec1=screen2.Bounds;
+		else{
+			rec1.Location+=new Size(screen2.Bounds.Location-new Size(screen1.Bounds.Location));
+			rec1.Size+=screen2.Bounds.Size-screen1.Bounds.Size;
+			if(!max2) max2=Maximize.Value&&!win1.Maximized;
+		}
+		if(win2.Fullscreen||win2.Maximized) rec2=screen1.Bounds;
+		else{
+			rec2.Location+=new Size(screen1.Bounds.Location-new Size(screen2.Bounds.Location));
+			rec2.Size+=screen1.Bounds.Size-screen2.Bounds.Size;
+			if(!max1) max1=Maximize.Value&&!win2.Maximized;
+		}
+
+		win1.MoveWindow(rec1,!max1);
+		win2.MoveWindow(rec2,!max2);
+		if(max1) win1.Maximized=true;
+		if(max2) win2.Maximized=true;
+
+		win1.SetTransitionsForceDisabled(false);
+		win2.SetTransitionsForceDisabled(false);
+
+		win1.Redraw();
+		win2.Redraw();
+	}
 }

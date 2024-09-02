@@ -31,11 +31,11 @@ public static partial class MoveWindows{
 
 	private static void MouseUp(MouseEvent e){
 		switch(e.Button){
-			case MouseButtons.Left when _move:
+			case MouseButtons.Left when _move!=WinWindow.Zero:
 				_move=WinWindow.Zero;
 				e.Handled=true;
 				break;
-			case MouseButtons.Right when _resize:
+			case MouseButtons.Right when _resize!=WinWindow.Zero:
 				_resize=WinWindow.Zero;
 				e.Handled=true;
 				break;
@@ -43,27 +43,26 @@ public static partial class MoveWindows{
 	}
 
 	private static void MouseMove(MouseEvent e){
-		if(EnableF1.Value&&_f1Down/*&&Modifiers.IsKeyDown(Keys.F1)*/){
-			Console.WriteLine(_f1Down);
+		if(EnableF1.Value&&_f1Down){
 			lock(typeof(MoveWindows))
 				if(_f1Running) return;
 				else _f1Running=true;
-			UiThread.BeginInvoke(RunF1);
+			UiThread.BeginInvoke(()=>RunF1(Modifiers.Win&&Modifiers.Ctrl));
 		} else _f1Down=false;
 
 
-		if(_move){
+		if(_move!=WinWindow.Zero){
 			var rect=_move.WindowRect;
 			rect.Left+=e.X-_moveX;
 			rect.Top+=e.Y-_moveY;
-			if(!_resize){
+			if(_resize==WinWindow.Zero){
 				rect.Right+=e.X-_moveX;
 				rect.Bottom+=e.Y-_moveY;
 			}
 			_moveX=e.X;
 			_moveY=e.Y;
 			_move.SetWindowPos(0,rect.Left,rect.Top,rect.Right-rect.Left,rect.Bottom-rect.Top,0);
-		} else if(_resize){
+		} else if(_resize!=WinWindow.Zero){
 			var rect=_resize.WindowRect;
 			rect.Right+=e.X-_moveX;
 			rect.Bottom+=e.Y-_moveY;

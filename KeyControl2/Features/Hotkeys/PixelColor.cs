@@ -1,4 +1,5 @@
 using KeyControl2.Util;
+using PlayifyUtility.Utils.Extensions;
 using PlayifyUtility.Windows.Features;
 using PlayifyUtility.Windows.Features.Hooks;
 using PlayifyUtility.Windows.Features.Interact;
@@ -15,7 +16,8 @@ public static class PixelColor{
 		if(!Modifiers.Win||!Modifiers.Ctrl) return;
 		e.Handled=true;
 
-		var color=(WinCursor.GetColorUnderCursor().ToArgb()&0xFFFFFF).ToString("X6");
+		if(!WinCursor.GetColorUnderCursor().TryGet(out var colorInstance)) return;
+		var color=(colorInstance.ToArgb()&0xFFFFFF).ToString("X6");
 		if(!Clipboard.ContainsText()||Clipboard.GetText()!=color)
 			Clipboard.SetText(color);
 		MouseToolTip.ShowToolTip($"Pixel color: {color}");

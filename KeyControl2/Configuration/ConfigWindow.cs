@@ -1,4 +1,3 @@
-using System.Reflection;
 using KeyControl2.Util;
 using PlayifyUtility.Windows;
 using PlayifyUtility.Windows.Features.Hooks;
@@ -14,16 +13,13 @@ public sealed partial class ConfigWindow:Form{
 	private static ConfigWindow Instance=>_instance??=UiThread.Create(nameof(ConfigWindow)).Invoke(()=>new ConfigWindow());
 
 	static ConfigWindow(){
+		using (var stream=ConfigServer.OpenFile("/favicon.ico")) ProgramIcon=new Icon(stream!);
 
-
-		using(var stream=ConfigServer.OpenFile("/favicon.ico")){
-			ProgramIcon=new Icon(stream!);
-		}
 		ToolStripMenuItem pause=null!;
 		// ReSharper disable once AccessToModifiedClosure
 		pause=new ToolStripMenuItem("Pause",null,(_,_)=>{
 			var paused=Utils.Paused^=true;
-			pause.Text=paused?"Resume Hooks":"Pause Hooks";
+			pause.Text=paused?"Resume":"Pause";
 		});
 
 		var notifyIcon=new NotifyIcon{
