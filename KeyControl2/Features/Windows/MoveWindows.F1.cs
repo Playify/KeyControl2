@@ -63,8 +63,11 @@ public static partial class MoveWindows{
 
 	public static void RunF1(bool swap=false){
 		var window=WinWindow.Foreground;
-		if(!IsValidWindow(window)) return;
-		if(!WinCursor.TryGetCursorPos(out var cursorPos)) return;
+		if(!IsValidWindow(window)||!WinCursor.TryGetCursorPos(out var cursorPos)){
+			lock(typeof(MoveWindows))
+				_f1Running=false;
+			return;
+		}
 		var other=swap?WinWindow.GetWindowAt(cursorPos):WinWindow.Zero;
 
 		UiThread.BeginInvoke(()=>{
