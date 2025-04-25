@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using PlayifyUtility.Windows;
 using PlayifyUtility.Windows.Features.Hooks;
 using PlayifyUtility.Windows.Features.Interact;
@@ -34,17 +35,15 @@ public static partial class MoveWindows{
 			}
 			send.SendNow();
 		} else if((mods&ModifierKeys.Windows)!=0&&(mods&ModifierKeys.Control)!=0){
-			e.Handled=true;
 			lock(typeof(MoveWindows))
 				if(_f1Running) return;
 				else _f1Running=true;
-			RunF1(true);
+			e.Handled=RunF1(true);
 		} else if(mods==ModifierKeys.None){
-			e.Handled=true;
 			lock(typeof(MoveWindows))
 				if(_f1Running) return;
 				else _f1Running=true;
-			RunF1();
+			e.Handled=RunF1();
 		}
 	}
 
@@ -61,67 +60,76 @@ public static partial class MoveWindows{
 		}
 	}
 
-	public static void RunF1(bool swap=false){
+	public static bool RunF1(bool swap=false){
 		var window=WinWindow.Foreground;
-		if(!IsValidWindow(window)||!WinCursor.TryGetCursorPos(out var cursorPos)){
+		bool handled=true;
+		if(!WinCursor.TryGetCursorPos(out var cursorPos)||!IsValidWindow(window,cursorPos,out handled)){
 			lock(typeof(MoveWindows))
 				_f1Running=false;
-			return;
+			return handled;
 		}
 		var other=swap?WinWindow.GetWindowAt(cursorPos):WinWindow.Zero;
 
 		UiThread.BeginInvoke(()=>{
-			if(IsValidWindow(other)) SwapWindows(window,other);
+			if(IsValidWindow(other,cursorPos,out _)) SwapWindows(window,other);
 			else MoveWindow(window,cursorPos);
 
 			lock(typeof(MoveWindows))
 				_f1Running=false;
 		});
+		return true;
 	}
 
-	private static bool IsValidWindow(WinWindow window){
+	private static bool IsValidWindow(WinWindow window,Point cursorPos,out bool handled){
+		handled=true;
 		if(window==WinWindow.Zero) return false;
 
 		//Desktop or Taskbar should not be moved
 		if(window.Class is "Progman" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd" or "WorkerW") return false;
-
+		
+		//Some windows should not be moved, as they cause trouble otherwise
+		if((window.Title?.EndsWith(" - Administratorzugriff - Getscreen.me - Google Chrome")??false)
+		   &&((Rectangle)window.WindowRect).Contains(cursorPos)) return handled=false;
 		if(Path.GetFileName(window.ProcessExe)=="paintdotnet.exe"&&(window.ExStyle&ExStyle.ToolWindow)!=0) return false;
 
 		return true;
 	}
 
 	private static void MoveWindow(WinWindow window,Point pos){
-
-		Rectangle rectangle=window.WindowRect;
-		var beforeScreen=Screen.FromRectangle(rectangle);
-		var afterScreen=Screen.FromPoint(pos);
-
-
-		window.SetTransitionsForceDisabled(true);
+		try{
+			Rectangle rectangle=window.WindowRect;
+			var beforeScreen=Screen.FromRectangle(rectangle);
+			var afterScreen=Screen.FromPoint(pos);
 
 
-		var maximize=false;
-		var isWin11=Environment.OSVersion.Version.Build>22000;//Win11 doesn't allow MoveWindow on already maximized windows, therefore a workaround is needed
-		if(isWin11&&beforeScreen.Bounds!=afterScreen.Bounds&&window.Maximized){
-			maximize=true;
-			window.Maximized=false;
-			rectangle=window.WindowRect;
+			window.SetTransitionsForceDisabled(true);
+
+
+			var maximize=false;
+			var isWin11=Environment.OSVersion.Version.Build>22000;//Win11 doesn't allow MoveWindow on already maximized windows, therefore a workaround is needed
+			if(isWin11&&beforeScreen.Bounds!=afterScreen.Bounds&&window.Maximized){
+				maximize=true;
+				window.Maximized=false;
+				rectangle=window.WindowRect;
+			}
+
+			if(window.Fullscreen||window.Maximized) rectangle=afterScreen.Bounds;
+			else{
+				rectangle.Location+=new Size(afterScreen.Bounds.Location-new Size(beforeScreen.Bounds.Location));
+				rectangle.Size+=afterScreen.Bounds.Size-beforeScreen.Bounds.Size;
+				if(!maximize)
+					maximize=Maximize.Value&&!window.Maximized;//Only for non fullscreen windows
+			}
+
+
+			window.MoveWindow(rectangle,!maximize);
+			if(maximize) window.Maximized=true;//maximizing redraws, therefore MoveWindow doesn't need to //but it does anyway, in hopes of fixing redraw bugs
+
+			window.SetTransitionsForceDisabled(false);
+			window.Redraw();
+		} catch(Win32Exception e){
+			Console.WriteLine(e);
 		}
-
-		if(window.Fullscreen||window.Maximized) rectangle=afterScreen.Bounds;
-		else{
-			rectangle.Location+=new Size(afterScreen.Bounds.Location-new Size(beforeScreen.Bounds.Location));
-			rectangle.Size+=afterScreen.Bounds.Size-beforeScreen.Bounds.Size;
-			if(!maximize)
-				maximize=Maximize.Value&&!window.Maximized;//Only for non fullscreen windows
-		}
-
-
-		window.MoveWindow(rectangle,!maximize);
-		if(maximize) window.Maximized=true;//maximizing redraws, therefore MoveWindow doesn't need to //but it does anyway, in hopes of fixing redraw bugs
-
-		window.SetTransitionsForceDisabled(false);
-		window.Redraw();
 	}
 
 	private static void SwapWindows(WinWindow win1,WinWindow win2){

@@ -57,10 +57,7 @@ public class ConfigServer:WebBase{
 		if(session.Path=="/version"){
 			await session.Send
 			             .Header("Access-Control-Allow-Origin","*")
-			             .Document()
-			             .MimeType("text/plain")
-			             .Set(Config.VersionString)
-			             .Send();
+			             .Text(Config.VersionString);
 			return;
 		}
 
